@@ -1,0 +1,1 @@
+nohup python3 /home/lxh/02_hupu_spider/main.py > /home/lxh/02_hupu_spider/nohup.out 2>&1 &
