@@ -4,13 +4,24 @@ import time
 import copy
 import logging
 import requests
+import utils
+from urllib.parse import urlencode
 
-url = "https://bbs.hupu.com/vote-2"
-proxies = {
-    "http": "http://http://80.106.247.145:53410",
+index_url = "https://bbs.mobileapi.hupu.com/1/7.3.17/topics"
+client = utils.get_random_client(),
+params = {
+    'all': '1',
+    'clientId': utils.get_random_clientId(),
+    'crt': int(time.time() * 1000),
+    'night': '0',
+    'client': client,
+    '_ssid': utils.get_random_ssid(),
+    '_imei': utils.get_random_imei(),
+    'time_zone': 'Asia/Shanghai',
+    'android_id': client,
 }
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36",
-}
+params["sign"] = utils.get_sign(params)
 
-print(requests.get(url, headers=headers, proxies=proxies).text)
+url = index_url + "?" + urlencode(params)
+
+print(requests.get(url))
