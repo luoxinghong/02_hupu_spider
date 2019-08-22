@@ -77,5 +77,4 @@ class HupuSpiderPipeline(object):
         cursor.execute(sqltext)
 
     def close_spider(self, spider):
-        self.cursor.close()
-        self.connect.close()
+        self.dbpool.close()
