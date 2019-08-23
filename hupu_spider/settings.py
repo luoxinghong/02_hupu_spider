@@ -17,7 +17,9 @@ RANDOM_UA_TYPE = 'random'
 DOWNLOADER_MIDDLEWARES = {
     'hupu_spider.middlewares.RandomUserAgentMiddleware': 543,
     'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
-    'hupu_spider.middlewares.ProxyMiddleware': 1,
+    # 'hupu_spider.middlewares.ProxyMiddleware': 1,
+    # 'hupu_spider.middlewares.ABProxyMiddleware': 1,
+    'hupu_spider.middlewares.KDLProxyMiddleware': 1,
 }
 
 ITEM_PIPELINES = {
@@ -25,17 +27,17 @@ ITEM_PIPELINES = {
 }
 
 # 增加爬虫速度及防ban配置
-DOWNLOAD_DELAY = 0.25
+DOWNLOAD_DELAY = 0
 DOWNLOAD_FAIL_ON_DATALOSS = False
-CONCURRENT_REQUESTS = 10
+CONCURRENT_REQUESTS = 1
 CONCURRENT_REQUESTS_PER_DOMAIN = 1
 CONCURRENT_REQUESTS_PER_IP = 1
 COOKIES_ENABLED = False
-DOWNLOAD_TIMEOUT = 60
+DOWNLOAD_TIMEOUT = 10
 
 
 # msyql数据库配置
-MYSQL_HOST = "106.12.8.109:5010"
+MYSQL_HOST = "localhost"
 MYSQL_DBNAME = "hupu"
 MYSQL_USER = "root"
 MYSQL_PASSWD = "lxh123"

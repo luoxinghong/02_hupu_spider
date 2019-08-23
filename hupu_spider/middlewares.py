@@ -14,7 +14,7 @@ from scrapy.downloadermiddlewares.retry import RetryMiddleware
 from scrapy.utils.response import response_status_message
 import time
 import base64
-
+import json
 import logging
 
 logger = logging.getLogger(__name__)
@@ -228,10 +228,68 @@ class MyRetryMiddleware(RetryMiddleware):
             return self._retry(request, exception, spider)
 
 
-    def process_exception(self, request, exception, spider):
-        if isinstance(exception, self.EXCEPTIONS_TO_RETRY) \
-                and not request.meta.get('dont_retry', False):
-            self.delete_proxy(request.meta.get('proxy'))
-            time.sleep(random.randint(3, 5))
-            logger.warning("proxy is unuseful {}, have to delete it".format(request.meta.get('proxy')))
-            return self._retry(request, exception, spider)
+""" 阿布云代理配置"""
+
+
+class ABProxyMiddleware(object):
+    """ 阿布云ip代理配置 """
+    proxyServer = "http://http-dyn.abuyun.com:9020"
+    proxyUser = "xxx"
+    proxyPass = "xxx"
+    proxyAuth = "Basic " + base64.urlsafe_b64encode(bytes((proxyUser + ":" + proxyPass), "ascii")).decode("utf8")
+
+    def process_request(self, request, spider):
+        request.meta["proxy"] = self.proxyServer
+        request.headers["Proxy-Authorization"] = self.proxyAuth
+
+
+def fetch_one_proxy():
+    """
+        提取一个代理
+    """
+    orderid = '906652644621628'  # 订单号
+    # 提取代理链接，以私密代理为例
+    api_url = "https://dps.kdlapi.com/api/getdps/?orderid={}&num=1&pt=1&format=json&sep=1"
+    fetch_url = api_url.format(orderid)
+    r = requests.get(fetch_url)
+    if r.status_code != 200:
+        logger.error("fail to fetch proxy")
+        return False
+    content = json.loads(r.content.decode('utf-8'))
+    ips = content['data']['proxy_list']
+    return ips[0]
+
+
+# 快代理非开放代理且未添加白名单，需用户名密码认证
+username = "767166726"
+password = "xxx"
+proxy = fetch_one_proxy()  # 获取一个代理
+THRESHOLD = 2  # 换ip阈值
+fail_time = 0  # 此ip异常次数
+
+
+class KDLProxyMiddleware(object):
+    def process_request(self, request, spider):
+        proxy_url = 'http://%s:%s@%s' % (username, password, proxy)
+        request.meta['proxy'] = proxy_url
+        auth = "Basic %s" % (base64.b64encode(('%s:%s' % (username, password)).encode('utf-8'))).decode('utf-8')
+        request.headers['Proxy-Authorization'] = auth
+
+    def process_response(self, request, response, spider):
+        global fail_time, proxy, THRESHOLD
+        if not (200 <= response.status < 300):
+            fail_time += 1
+            if fail_time >= THRESHOLD:
+                proxy = fetch_one_proxy()
+                fail_time = 0
+        return response
+
+
+if __name__ == "__main__":
+    for i in range(100):
+        proxy = fetch_one_proxy()
+        proxy_url = 'http://%s:%s@%s' % (username, password, proxy)
+        headers = {}
+        auth = "Basic %s" % (base64.b64encode(('%s:%s' % (username, password)).encode('utf-8'))).decode('utf-8')
+        headers['Proxy-Authorization'] = auth
+        print(requests.get("https://bbs.hupu.com/vote-2", headers=headers, proxies={"http": proxy_url}).text)
