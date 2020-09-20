@@ -1,0 +1,4 @@
+crawling: https://www.healthline.com/health/womens-health-sex
+get_html error-- HTTPSConnectionPool(host='www.healthline.com', port=443): Max retries exceeded with url: /health/womens-health-sex (Caused by SSLError("Can't connect to HTTPS URL because the SSL module is not available.",))
+crawling: https://www.healthline.com/health/womens-health-sex
+get_html error-- HTTPSConnectionPool(host='www.healthline.com', port=443): Max retries exceeded with url: /health/womens-health-sex (Caused by SSLError("Can't connect to HTTPS URL because the SSL module is not available.",))
